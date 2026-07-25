@@ -62,7 +62,7 @@ export default function ProductForm() {
       if (res.data && res.data.data) {
         setCategories(res.data.data)
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to fetch categories')
     }
   }
@@ -88,7 +88,7 @@ export default function ProductForm() {
         })
         setVariants(prod.variants || [])
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to fetch product details')
     } finally {
       setLoading(false)

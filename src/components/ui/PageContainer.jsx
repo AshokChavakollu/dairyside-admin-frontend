@@ -1,5 +1,3 @@
-import { cn } from '../../utils/cn'
-
 // Centers page content and caps it on very large screens so lines/tables don't
 // stretch edge-to-edge on wide monitors. The AppShell <main> owns the outer
 // padding (responsive); this just constrains width. Use once at the top of a page.

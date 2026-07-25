@@ -63,7 +63,7 @@ export default function SubscriptionDetail() {
       if (Array.isArray(days)) {
         customDaysText = days.map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ')
       }
-    } catch (e) {
+    } catch {
       customDaysText = String(sub.custom_days)
     }
   }
