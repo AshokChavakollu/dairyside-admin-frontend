@@ -110,3 +110,12 @@ export const auditApi = {
   removeMany: (body) => apiClient.delete('/admin/audit-logs', { data: body }),
   deletePreview: (body) => apiClient.post('/admin/audit-logs/delete-preview', body),
 }
+
+export const paymentsApi = {
+  getSettings: () => apiClient.get('/admin/payments/settings'),
+  updateSettings: (data) => apiClient.put('/admin/payments/settings', data),
+  getStats: () => apiClient.get('/admin/payments/stats'),
+  getTransactions: (params) => apiClient.get('/admin/payments/transactions', { params }),
+  getTransactionById: (id) => apiClient.get(`/admin/payments/transactions/${id}`),
+  refundTransaction: (id, data) => apiClient.post(`/admin/payments/transactions/${id}/refund`, data),
+}

@@ -143,6 +143,12 @@ export const NAV_ITEMS = [
     icon: 'coupons',
   },
   {
+    id: 'payments',
+    label: 'Payment System',
+    path: '/payments',
+    icon: 'payments',
+  },
+  {
     id: 'content',
     label: 'Content',
     path: '/banners',

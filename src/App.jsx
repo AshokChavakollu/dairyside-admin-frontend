@@ -35,6 +35,7 @@ import ContactMessages from './pages/messages/ContactMessages'
 import AuditLogs from './pages/audit/AuditLogs'
 import PincodeList from './pages/service-area/PincodeList'
 import DeliverySlotList from './pages/service-area/DeliverySlotList'
+import PaymentManagement from './pages/payments/PaymentManagement'
 import ComingSoon from './pages/ComingSoon'
 
 export default function App() {
@@ -69,8 +70,9 @@ export default function App() {
         {/* Deliveries */}
         <Route path="deliveries" element={<DeliveryManifest />} />
 
-        {/* Coupons */}
+        {/* Coupons & Payments */}
         <Route path="coupons" element={<CouponList />} />
+        <Route path="payments" element={<PaymentManagement />} />
         <Route path="coupons/new" element={<ComingSoon title="Create Coupon" description="Coupon create form is being built" />} />
         <Route path="coupons/:id/edit" element={<ComingSoon title="Edit Coupon" description="Coupon edit form is being built" />} />
 
