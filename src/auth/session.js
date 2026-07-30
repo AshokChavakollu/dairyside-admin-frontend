@@ -11,7 +11,7 @@
 // on every request.
 import axios from 'axios'
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
-import { auth } from './firebase'
+import { getFirebaseAuth, isFirebaseConfigured, FIREBASE_NOT_CONFIGURED } from './firebase'
 import apiClient from '../api/apiClient'
 
 // A bare client for the "am I signed in?" probe. apiClient's interceptor logs
@@ -30,9 +30,14 @@ const probe = axios.create({
  * @throws {{message: string}} on bad credentials OR on a valid non-admin account
  */
 export async function login(email, password) {
+  // Surfaced on the login form rather than as a crash: a deployment without
+  // VITE_FIREBASE_* is an operator problem, and the operator needs to be able
+  // to read what it is.
+  if (!isFirebaseConfigured) throw { message: FIREBASE_NOT_CONFIGURED }
+
   let cred
   try {
-    cred = await signInWithEmailAndPassword(auth, String(email).trim(), password)
+    cred = await signInWithEmailAndPassword(getFirebaseAuth(), String(email).trim(), password)
   } catch {
     // Firebase distinguishes "no such user" from "wrong password"; we do not —
     // that difference tells an attacker which addresses have accounts.
@@ -48,7 +53,7 @@ export async function login(email, password) {
     // A real Firebase user who is not on the allowlist must not be left signed
     // in to Firebase — otherwise the panel holds a live identity for someone the
     // API will reject on every call.
-    await signOut(auth).catch(() => {})
+    await signOut(getFirebaseAuth()).catch(() => {})
     throw { message: err?.message || 'Could not sign in' }
   }
 }
@@ -60,7 +65,9 @@ export async function logout() {
   } catch {
     /* the cookie may already be gone; sign out locally regardless */
   }
-  await signOut(auth).catch(() => {})
+  // Guarded: an unconfigured build has no Firebase identity to clear, and
+  // logout must still succeed at clearing the API cookie.
+  if (isFirebaseConfigured) await signOut(getFirebaseAuth()).catch(() => {})
 }
 
 /**
