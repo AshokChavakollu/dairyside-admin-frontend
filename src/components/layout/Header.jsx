@@ -1,12 +1,15 @@
 import { useLocation, useNavigate, Link } from 'react-router-dom'
-import { logout } from '../../auth/session'
+import { useAdminAuth } from '../../auth/AdminAuthContext'
 
 export default function Header({ showHamburger, onHamburger }) {
   const location = useLocation()
   const navigate = useNavigate()
+  const { logout } = useAdminAuth()
 
-  const handleLogout = () => {
-    logout()
+  // Await the logout so the API cookie is actually cleared before we navigate —
+  // otherwise the redirect can race the request and leave the session alive.
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
   }
 

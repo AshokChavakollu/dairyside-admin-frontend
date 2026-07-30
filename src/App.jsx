@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router-dom'
 import AdminLayout from './components/layout/AdminLayout'
 import Login from './pages/auth/Login'
-import { isAuthed } from './auth/session'
+import { useAdminAuth } from './auth/AdminAuthContext'
 
 // Helper to redirect /products/:id to /products/:id/edit
 function ProductRedirect() {
@@ -9,12 +9,34 @@ function ProductRedirect() {
   return <Navigate to={`/products/${id}/edit`} replace />
 }
 
-// Gate every admin route behind the static-credentials login. Unauthenticated
+// Shown while the API is being asked who we are. Rendering nothing here (or
+// redirecting) would flash the login screen at an already-authenticated admin
+// on every page refresh.
+function AuthPending() {
+  return (
+    <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh', color: 'var(--text-secondary)' }}>
+      Checking your session…
+    </div>
+  )
+}
+
+// Gate every admin route behind a verified server session. Unauthenticated
 // visits redirect to /login and bounce back to the page they wanted after.
+// This is a UX gate only — the API enforces the same check on every request.
 function RequireAuth({ children }) {
   const location = useLocation()
-  if (!isAuthed()) return <Navigate to="/login" state={{ from: location }} replace />
+  const { status } = useAdminAuth()
+  if (status === 'loading') return <AuthPending />
+  if (status === 'anon') return <Navigate to="/login" state={{ from: location }} replace />
   return children
+}
+
+// Keeps a signed-in admin off the login screen without flashing it first.
+function LoginRoute() {
+  const { status } = useAdminAuth()
+  if (status === 'loading') return <AuthPending />
+  if (status === 'authed') return <Navigate to="/" replace />
+  return <Login />
 }
 import Dashboard from './pages/Dashboard'
 import OrderList from './pages/orders/OrderList'
@@ -41,7 +63,7 @@ import ComingSoon from './pages/ComingSoon'
 export default function App() {
   return (
     <Routes>
-      <Route path="login" element={isAuthed() ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="login" element={<LoginRoute />} />
       <Route element={<RequireAuth><AdminLayout /></RequireAuth>}>
         {/* Dashboard */}
         <Route index element={<Dashboard />} />

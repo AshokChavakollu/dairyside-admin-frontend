@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { login } from '../../auth/session'
+import { useAdminAuth } from '../../auth/AdminAuthContext'
 
 const LOGO_URL =
   'https://res.cloudinary.com/jkew0usj/image/upload/f_png,h_96/v1784492249/dairyside/logo/dairyside2_qodnwa.svg'
@@ -26,6 +26,7 @@ const EyeIcon = ({ off }) => (
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { login } = useAdminAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -33,23 +34,27 @@ export default function Login() {
   const [busy, setBusy] = useState(false)
   const [shake, setShake] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (busy) return
     setBusy(true)
     setError('')
-    // Small deliberate delay so the button state reads as a real sign-in.
-    setTimeout(() => {
-      if (login(email, password)) {
-        const dest = location.state?.from?.pathname || '/'
-        navigate(dest, { replace: true })
-      } else {
-        setError('Incorrect email or password')
-        setShake(true)
-        setTimeout(() => setShake(false), 500)
-      }
+    try {
+      // Real round trip now (Firebase, then the admin API's allowlist check) —
+      // the old artificial delay that made the button "feel" like a sign-in is
+      // no longer needed.
+      await login(email, password)
+      const dest = location.state?.from?.pathname || '/'
+      navigate(dest, { replace: true })
+    } catch (err) {
+      // Covers both bad credentials and a valid account that is not an admin;
+      // the API's message distinguishes them.
+      setError(err?.message || 'Could not sign in')
+      setShake(true)
+      setTimeout(() => setShake(false), 500)
+    } finally {
       setBusy(false)
-    }, 550)
+    }
   }
 
   const inputWrap = {
@@ -155,7 +160,7 @@ export default function Login() {
             <input
               style={inputStyle}
               type="email"
-              placeholder="admin@dairyside.in"
+              placeholder="you@dairyside.in"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"

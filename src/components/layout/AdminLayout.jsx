@@ -4,8 +4,10 @@ import Sidebar from './Sidebar'
 import Header from './Header'
 import PageContainer from '../ui/PageContainer'
 import { useIsDesktop } from '../../hooks/useMediaQuery'
+import useAdminFeed from '../../hooks/useAdminFeed'
 
 export default function AdminLayout() {
+  useAdminFeed() // live new-order / low-stock toasts on every admin screen
   const isDesktop = useIsDesktop() // lg+ → persistent sidebar; below → off-canvas drawer
   const [collapsed, setCollapsed] = useState(false) // desktop rail collapse
   const [mobileOpen, setMobileOpen] = useState(false) // mobile drawer
