@@ -50,21 +50,24 @@ export default function PaymentManagement() {
         paymentsApi.getStats(),
       ])
 
-      if (settRes?.raw) {
+      const settingsData = settRes?.data || settRes
+      const statsData = statRes?.data || statRes
+
+      if (settingsData?.raw) {
         setSettings((prev) => ({
           ...prev,
-          razorpay_enabled: (settRes.raw.razorpay_enabled ?? 'true') === 'true',
-          cod_enabled: (settRes.raw.cod_enabled ?? 'true') === 'true',
-          wallet_enabled: (settRes.raw.wallet_enabled ?? 'true') === 'true',
-          upi_enabled: (settRes.raw.upi_enabled ?? 'true') === 'true',
-          active_payment_gateway: settRes.raw.active_payment_gateway || 'razorpay',
-          razorpay_key_id: settRes.raw.razorpay_key_id || 'rzp_test_T0ROrLNim09D7D',
-          razorpay_key_secret: settRes.raw.razorpay_key_secret || 'UCc6qOXIUjbjFS4TtP9QuXKn',
+          razorpay_enabled: (settingsData.raw.razorpay_enabled ?? 'true') === 'true',
+          cod_enabled: (settingsData.raw.cod_enabled ?? 'true') === 'true',
+          wallet_enabled: (settingsData.raw.wallet_enabled ?? 'true') === 'true',
+          upi_enabled: (settingsData.raw.upi_enabled ?? 'true') === 'true',
+          active_payment_gateway: settingsData.raw.active_payment_gateway || 'razorpay',
+          razorpay_key_id: settingsData.raw.razorpay_key_id || 'rzp_test_T0ROrLNim09D7D',
+          razorpay_key_secret: settingsData.raw.razorpay_key_secret || 'UCc6qOXIUjbjFS4TtP9QuXKn',
         }))
       }
 
-      if (statRes) {
-        setStats(statRes)
+      if (statsData) {
+        setStats(statsData)
       }
     } catch {
       setMessage({ type: 'error', text: 'Failed to load payment configurations' })
@@ -83,8 +86,9 @@ export default function PaymentManagement() {
         method: txFilter.method || undefined,
         search: txFilter.search || undefined,
       })
-      setTransactions(res.items || [])
-      setTotalTx(res.pagination?.total || 0)
+      const txData = res?.data || res
+      setTransactions(txData.items || [])
+      setTotalTx(txData.pagination?.total || 0)
     } catch {
       /* ignore non-critical */
     }
@@ -150,7 +154,7 @@ export default function PaymentManagement() {
     { key: 'order_id', header: 'Order ID', render: (val) => <span className="font-mono font-bold">#{val}</span> },
     { key: 'customer_name', header: 'Customer', render: (val, row) => <div><div className="font-medium">{val}</div><div className="text-xs text-gray-500">{row.customer_phone || row.customer_email || '—'}</div></div> },
     { key: 'total_amount', header: 'Amount', render: (val) => <span className="font-bold text-green-700">{formatCurrency(val)}</span> },
-    { key: 'payment_method', header: 'Method', render: (val) => <span className="uppercase text-xs font-semibold px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">{val || 'razorpay'}</span> },
+    { key: 'payment_method', header: 'Method', render: (val) => <span className="uppercase text-xs font-semibold text-blue-500 px-4 py-1   bg-gray-100 dark:bg-gray-800 rounded">{val || 'razorpay'}</span> },
     { key: 'payment_status', header: 'Status', render: (val) => <StatusBadge status={val || 'pending'} /> },
     { key: 'created_at', header: 'Date', render: (val) => formatDate(val) },
     {
@@ -417,6 +421,12 @@ export default function PaymentManagement() {
             data={transactions}
             loading={loading}
             emptyMessage="No payment transactions found matching filter criteria."
+            pagination={{
+              total: totalTx,
+              limit: 15,
+              offset: (txFilter.page - 1) * 15
+            }}
+            onPageChange={(offset) => setTxFilter((p) => ({ ...p, page: Math.floor(offset / 15) + 1 }))}
           />
         </div>
       )}

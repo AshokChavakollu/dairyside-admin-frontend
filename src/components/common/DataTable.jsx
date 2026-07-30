@@ -120,35 +120,104 @@ export default function DataTable({
           </div>
 
           {/* Pagination */}
-          {pagination && (
-            <div
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                flexWrap: 'wrap', gap: '10px', padding: '12px 16px',
-                borderTop: '1px solid var(--border-default)', fontSize: '0.8125rem', color: 'var(--text-secondary)',
-              }}
-            >
-              <span>
-                Showing {pagination.offset + 1}–{Math.min(pagination.offset + data.length, pagination.total)} of {pagination.total}
-              </span>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => onPageChange?.(Math.max(0, pagination.offset - pagination.limit))}
-                  disabled={pagination.offset === 0}
-                  style={pageBtn(pagination.offset === 0)}
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => onPageChange?.(pagination.offset + pagination.limit)}
-                  disabled={pagination.offset + data.length >= pagination.total}
-                  style={pageBtn(pagination.offset + data.length >= pagination.total)}
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          {pagination && (() => {
+            const { offset, limit, total } = pagination;
+            const currentPage = Math.floor(offset / limit) + 1;
+            const totalPages = Math.ceil(total / limit) || 1;
+
+            const getPageNumbers = () => {
+              const pages = [];
+              if (totalPages <= 7) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+                return pages;
+              }
+              if (currentPage <= 3) {
+                pages.push(1, 2, 3, 4, '...', totalPages);
+              } else if (currentPage >= totalPages - 2) {
+                pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+              } else {
+                pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+              }
+              return pages;
+            };
+
+            const ChevronLeft = () => (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            )
+            const ChevronRight = () => (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            )
+            
+            const arrowCls = `grid h-9 w-9 place-items-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-tertiary)] text-[var(--text-secondary)]
+              shadow-sm transition-all duration-200 hover:border-gray-400 dark:hover:border-gray-500 hover:text-[var(--text-primary)] hover:shadow
+              disabled:cursor-not-allowed disabled:opacity-40 disabled:border-[var(--border-default)]
+              disabled:shadow-none disabled:hover:shadow-none cursor-pointer`;
+
+            return (
+              <nav
+                className="flex flex-col-reverse items-center justify-between gap-3 border-t border-[var(--border-default)] !p-3 sm:flex-row"
+              >
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Showing <span className="font-semibold text-[var(--text-primary)]">{pagination.total === 0 ? 0 : pagination.offset + 1}–{Math.min(pagination.offset + data.length, pagination.total)}</span> of{" "}
+                  <span className="font-semibold text-[var(--text-primary)]">{pagination.total}</span>
+                </p>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => onPageChange?.(Math.max(0, pagination.offset - pagination.limit))}
+                    disabled={pagination.offset === 0}
+                    className={arrowCls}
+                  >
+                    <ChevronLeft />
+                  </button>
+
+                  {/* Mobile Readout */}
+                  <p className="px-2 text-sm font-medium text-[var(--text-secondary)] sm:hidden">
+                    Page <span className="font-semibold text-[var(--text-primary)]">{currentPage}</span> of {totalPages}
+                  </p>
+
+                  {/* Desktop Page Numbers */}
+                  <ul className="hidden list-none items-center gap-1.5 p-0 sm:flex m-0">
+                    {getPageNumbers().map((p, i) => {
+                      if (p === '...') {
+                        return (
+                          <li key={i} className="grid h-9 w-6 place-items-center text-sm text-[var(--text-tertiary)]">
+                            …
+                          </li>
+                        )
+                      }
+                      const isActive = p === currentPage;
+                      return (
+                        <li key={i}>
+                          <button
+                            onClick={() => onPageChange?.((p - 1) * limit)}
+                            className={`h-9 min-w-[2.25rem] rounded-xl border px-3 text-sm tabular-nums transition-all duration-200 cursor-pointer
+                              ${isActive
+                                ? "border-[var(--color-primary)] bg-[var(--color-primary)] font-semibold text-white shadow-sm"
+                                : "border-[var(--border-default)] bg-[var(--bg-tertiary)] font-medium text-[var(--text-secondary)] shadow-sm hover:border-gray-400 dark:hover:border-gray-500 hover:text-[var(--text-primary)] hover:shadow"}`}
+                          >
+                            {p}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+
+                  <button
+                    onClick={() => onPageChange?.(pagination.offset + pagination.limit)}
+                    disabled={pagination.offset + data.length >= pagination.total}
+                    className={arrowCls}
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </nav>
+            )
+          })()}
         </>
       )}
     </div>
