@@ -196,7 +196,16 @@ export default function ProductForm() {
       }
 
       if (editingVariant) {
+        // The variant PUT no longer carries stock — it wrote the column
+        // absolutely, so saving a price change re-asserted whatever stock read
+        // when this modal opened and silently undid any sale made in between.
+        // Stock goes through the ledgered endpoint instead, and only when the
+        // admin actually changed the number.
         await api.put(`/variants/${editingVariant.id}`, payload)
+        const newStock = Number(variantForm.stock_quantity || 0)
+        if (newStock !== Number(editingVariant.stock_quantity ?? 0)) {
+          await api.patch(`/variants/${editingVariant.id}/stock`, { stock_quantity: newStock })
+        }
         toast.success('Variant updated successfully')
       } else {
         await api.post(`/products/${id}/variants`, payload)
