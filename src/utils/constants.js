@@ -137,6 +137,17 @@ export const NAV_ITEMS = [
     icon: 'deliveries',
   },
   {
+    id: 'farm-visit',
+    label: 'Farm Visits',
+    path: '/farm-visit/bookings',
+    icon: 'deliveries',
+    children: [
+      { id: 'farm-visit-bookings', label: 'Bookings', path: '/farm-visit/bookings' },
+      { id: 'farm-visit-slots', label: 'Slots', path: '/farm-visit/slots' },
+      { id: 'farm-visit-content', label: 'Page Content', path: '/farm-visit/content' },
+    ],
+  },
+  {
     id: 'coupons',
     label: 'Coupons',
     path: '/coupons',

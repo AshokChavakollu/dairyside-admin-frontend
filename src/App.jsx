@@ -50,6 +50,9 @@ import CustomerDetail from './pages/customers/CustomerDetail'
 import SubscriptionList from './pages/subscriptions/SubscriptionList'
 import SubscriptionDetail from './pages/subscriptions/SubscriptionDetail'
 import TrialPackList from './pages/subscriptions/TrialPackList'
+import FarmVisitBookings from './pages/farm-visit/FarmVisitBookings'
+import FarmVisitSlots from './pages/farm-visit/FarmVisitSlots'
+import FarmVisitContent from './pages/farm-visit/FarmVisitContent'
 import DeliveryManifest from './pages/deliveries/DeliveryManifest'
 import CouponList from './pages/coupons/CouponList'
 import AppSettings from './pages/content/AppSettings'
@@ -88,6 +91,11 @@ export default function App() {
         <Route path="subscriptions" element={<SubscriptionList />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetail />} />
         <Route path="trial-packs" element={<TrialPackList />} />
+
+        {/* Farm Visits */}
+        <Route path="farm-visit/bookings" element={<FarmVisitBookings />} />
+        <Route path="farm-visit/slots" element={<FarmVisitSlots />} />
+        <Route path="farm-visit/content" element={<FarmVisitContent />} />
 
         {/* Deliveries */}
         <Route path="deliveries" element={<DeliveryManifest />} />

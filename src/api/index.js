@@ -119,3 +119,40 @@ export const paymentsApi = {
   getTransactionById: (id) => apiClient.get(`/admin/payments/transactions/${id}`),
   refundTransaction: (id, data) => apiClient.post(`/admin/payments/transactions/${id}/refund`, data),
 }
+
+// Farm Visit — page content, bookable slots and the visit bookings queue.
+// Slot capacity and booking status changes are guarded server-side (a slot can
+// never be shrunk below its booked seats, and cancelling releases them inside a
+// transaction), so these are thin passthroughs.
+export const farmVisitApi = {
+  // Farm
+  getFarms: () => apiClient.get('/admin/farm-visit/farms'),
+  getFarm: (farmId) => apiClient.get(`/admin/farm-visit/farms/${farmId}`),
+  updateFarm: (farmId, data) => apiClient.put(`/admin/farm-visit/farms/${farmId}`, data),
+
+  // Content sections: 'blocks' | 'gallery' | 'testimonials' | 'faqs'
+  getSection: (farmId, section) =>
+    apiClient.get(`/admin/farm-visit/farms/${farmId}/content/${section}`),
+  createSectionRow: (farmId, section, data) =>
+    apiClient.post(`/admin/farm-visit/farms/${farmId}/content/${section}`, data),
+  updateSectionRow: (section, id, data) =>
+    apiClient.put(`/admin/farm-visit/content/${section}/${id}`, data),
+  deleteSectionRow: (section, id) =>
+    apiClient.delete(`/admin/farm-visit/content/${section}/${id}`),
+
+  // Slots
+  getSlots: (farmId, params) =>
+    apiClient.get(`/admin/farm-visit/farms/${farmId}/slots`, { params }),
+  createSlot: (farmId, data) => apiClient.post(`/admin/farm-visit/farms/${farmId}/slots`, data),
+  generateSlots: (farmId, data) =>
+    apiClient.post(`/admin/farm-visit/farms/${farmId}/slots/generate`, data),
+  updateSlot: (id, data) => apiClient.put(`/admin/farm-visit/slots/${id}`, data),
+  deleteSlot: (id) => apiClient.delete(`/admin/farm-visit/slots/${id}`),
+
+  // Bookings
+  getBookings: (params) => apiClient.get('/admin/farm-visit/bookings', { params }),
+  getBooking: (id) => apiClient.get(`/admin/farm-visit/bookings/${id}`),
+  updateBookingStatus: (id, status) =>
+    apiClient.patch(`/admin/farm-visit/bookings/${id}/status`, { status }),
+  getBookingStats: (farmId) => apiClient.get(`/admin/farm-visit/farms/${farmId}/booking-stats`),
+}
