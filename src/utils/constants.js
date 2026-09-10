@@ -167,6 +167,7 @@ export const NAV_ITEMS = [
     children: [
       { id: 'banners', label: 'Banners', path: '/banners' },
       { id: 'notifications', label: 'Notifications', path: '/notifications' },
+      { id: 'reviews', label: 'Reviews', path: '/reviews' },
       { id: 'settings', label: 'App Settings', path: '/settings' },
     ],
   },

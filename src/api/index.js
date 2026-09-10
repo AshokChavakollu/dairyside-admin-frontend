@@ -83,6 +83,15 @@ export const contentApi = {
   updateSettings: (data) => apiClient.put('/admin/settings', data),
 }
 
+// Customer reviews. Read-only plus a feature toggle — the admin API has no
+// create/edit route, because a review may only be written by a verified
+// purchaser through the customer app. That is what makes the home page
+// testimonials trustworthy.
+export const reviewsApi = {
+  getReviews: (params) => apiClient.get('/admin/reviews', { params }),
+  setFeatured: (id, is_featured) => apiClient.patch(`/admin/reviews/${id}/featured`, { is_featured }),
+}
+
 export const serviceAreaApi = {
   getPincodes: (params) => apiClient.get('/admin/pincodes', { params }),
   createPincode: (data) => apiClient.post('/admin/pincodes', data),

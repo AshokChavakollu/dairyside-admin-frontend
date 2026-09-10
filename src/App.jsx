@@ -56,6 +56,7 @@ import FarmVisitContent from './pages/farm-visit/FarmVisitContent'
 import DeliveryManifest from './pages/deliveries/DeliveryManifest'
 import CouponList from './pages/coupons/CouponList'
 import AppSettings from './pages/content/AppSettings'
+import Reviews from './pages/content/Reviews'
 import ContactMessages from './pages/messages/ContactMessages'
 import AuditLogs from './pages/audit/AuditLogs'
 import PincodeList from './pages/service-area/PincodeList'
@@ -109,6 +110,7 @@ export default function App() {
         {/* Content */}
         <Route path="banners" element={<ComingSoon title="Banners" description="Banner management is being built" />} />
         <Route path="notifications" element={<ComingSoon title="Notifications" description="Notification system is being built" />} />
+        <Route path="reviews" element={<Reviews />} />
         <Route path="settings" element={<AppSettings />} />
 
         {/* Service Area */}
