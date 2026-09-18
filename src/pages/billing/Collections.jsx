@@ -19,7 +19,14 @@ import StatusBadge from '../../components/common/StatusBadge'
 import Button from '../../components/common/Button'
 import Modal from '../../components/common/Modal'
 import { billingApi } from '../../api'
-import { formatCurrency, formatDate } from '../../utils/formatters'
+import { formatDate } from '../../utils/formatters'
+
+// The shared formatCurrency() drops trailing paise (minimumFractionDigits: 0),
+// which is fine for a revenue tile and wrong on a bill you are counting cash
+// against: 16,090.5 is not an amount anybody hands over. Always two decimals
+// here, without changing the formatter every other screen depends on.
+const formatCurrency = (amount) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(amount) || 0)
 
 const METHODS = [
   { value: 'cash', label: 'Cash' },
@@ -78,11 +85,11 @@ export default function Collections() {
     try {
       setLoading(true)
       const res = await billingApi.getCollectible({ status: filter.status || undefined, search: filter.search || undefined })
-      const d = res.data?.data || {}
+      const d = res?.data || res || {}
       setInvoices(d.invoices || [])
       setStats(d.stats || null)
     } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.error || 'Could not load the bills.' })
+      setMessage({ type: 'error', text: err?.message || 'Could not load the bills.' })
     } finally {
       setLoading(false)
     }
@@ -98,7 +105,7 @@ export default function Collections() {
     setForm({ amount: String(row.balance), method: 'cash', reference: '', receivedAt: todayYmd(), note: '', receivedBy: '' })
     try {
       const res = await billingApi.getInvoice(row.id)
-      setDetail(res.data?.data || null)
+      setDetail(res?.data || res || null)
     } catch {
       setDetail(null) // the history is a nicety; taking the money is not blocked on it
     }
@@ -107,6 +114,8 @@ export default function Collections() {
   const closeCollect = () => { setTarget(null); setDetail(null); setFormError('') }
 
   const balance = Number(target?.balance || 0)
+  const billTotal = Number(target?.total_amount || 0)
+  const alreadyPaid = Number(target?.paid_amount || 0)
   const amountNum = Number(form.amount)
   const remaining = useMemo(() => Math.round((balance - (amountNum || 0)) * 100) / 100, [balance, amountNum])
   const amountValid = amountNum > 0 && amountNum - balance <= 0.005
@@ -128,7 +137,7 @@ export default function Collections() {
         note: form.note || undefined,
         receivedBy: form.receivedBy || undefined,
       })
-      const out = res.data?.data || {}
+      const out = res?.data || res || {}
       setMessage({
         type: 'success',
         text: out.fullyPaid
@@ -140,7 +149,7 @@ export default function Collections() {
     } catch (err) {
       // Never close on failure: if nothing was recorded, the person at the
       // counter must see that and try again.
-      setFormError(err.response?.data?.error || err.message || 'The payment could not be recorded. Nothing was saved — please try again.')
+      setFormError(err?.message || 'The payment could not be recorded. Nothing was saved — please try again.')
     } finally {
       setSaving(false)
     }
@@ -172,7 +181,7 @@ export default function Collections() {
       header: 'Owed',
       render: (_v, row) => (
         <div>
-          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatCurrency(row.balance)}</div>
+          <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{formatCurrency(Number(row.balance))}</div>
           {Number(row.paid_amount) > 0 && (
             <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
               {formatCurrency(row.paid_amount)} of {formatCurrency(row.total_amount)} paid
@@ -185,7 +194,7 @@ export default function Collections() {
       key: 'due_date',
       header: 'Due',
       render: (_v, row) => (
-        <span style={{ color: row.overdue ? 'var(--color-danger, #dc2626)' : 'var(--text-secondary)', fontWeight: row.overdue ? 600 : 400 }}>
+        <span style={{ color: Number(row.overdue) ? 'var(--color-danger, #dc2626)' : 'var(--text-secondary)', fontWeight: Number(row.overdue) ? 600 : 400 }}>
           {row.due_date ? formatDate(row.due_date) : '—'}
         </span>
       ),
@@ -193,7 +202,7 @@ export default function Collections() {
     {
       key: 'status',
       header: 'Status',
-      render: (_v, row) => <StatusBadge status={row.overdue ? 'overdue' : row.status === 'partial' ? 'partial' : 'unpaid'} />,
+      render: (_v, row) => <StatusBadge status={Number(row.overdue) ? 'overdue' : row.status === 'partial' ? 'partial' : 'unpaid'} />,
     },
     {
       key: 'actions',
@@ -276,9 +285,9 @@ export default function Collections() {
                 <span style={{ color: 'var(--text-tertiary)' }}>{target.customer_mobile || ''}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8, alignItems: 'baseline' }}>
-                <strong style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>{formatCurrency(target.balance)}</strong>
+                <strong style={{ fontSize: '1.5rem', color: 'var(--text-primary)' }}>{formatCurrency(balance)}</strong>
                 <span style={{ color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>
-                  {Number(target.paid_amount) > 0 ? `${formatCurrency(target.paid_amount)} of ${formatCurrency(target.total_amount)} already paid` : 'nothing paid yet'}
+                  {alreadyPaid > 0 ? `${formatCurrency(alreadyPaid)} of ${formatCurrency(billTotal)} already paid` : 'nothing paid yet'}
                 </span>
               </div>
             </div>
