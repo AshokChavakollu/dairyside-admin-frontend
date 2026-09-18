@@ -155,9 +155,13 @@ export const NAV_ITEMS = [
   },
   {
     id: 'payments',
-    label: 'Payment System',
-    path: '/payments',
+    label: 'Payments',
+    path: '/collections',
     icon: 'payments',
+    children: [
+      { id: 'collections', label: 'Collections', path: '/collections' },
+      { id: 'payment-system', label: 'Payment System', path: '/payments' },
+    ],
   },
   {
     id: 'content',

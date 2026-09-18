@@ -120,6 +120,17 @@ export const auditApi = {
   deletePreview: (body) => apiClient.post('/admin/audit-logs/delete-preview', body),
 }
 
+// Billing & collections — monthly milk bills and the money taken at the dairy
+// counter. The list is read from the shared DB by the admin API; recording a
+// payment is forwarded to the customer backend, which owns invoice money and
+// sends the customer their receipt.
+export const billingApi = {
+  getCollectible: (params) => apiClient.get('/admin/billing/invoices', { params }),
+  getInvoice: (id) => apiClient.get(`/admin/billing/invoices/${id}`),
+  recordPayment: (id, data) => apiClient.post(`/admin/billing/invoices/${id}/payments`, data),
+  getPayments: (params) => apiClient.get('/admin/billing/payments', { params }),
+}
+
 export const paymentsApi = {
   getSettings: () => apiClient.get('/admin/payments/settings'),
   updateSettings: (data) => apiClient.put('/admin/payments/settings', data),

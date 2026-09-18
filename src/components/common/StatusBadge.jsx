@@ -17,6 +17,10 @@ const statusStyles = {
   resolved: { bg: '#d1fae5', text: '#059669', dot: '#10b981' },
   claimed: { bg: '#e0e7ff', text: '#4f46e5', dot: '#6366f1' },
   scheduled: { bg: '#e0f2fe', text: '#0369a1', dot: '#0ea5e9' },
+  // Monthly milk bills: what is still owed on them.
+  unpaid: { bg: '#fef3c7', text: '#d97706', dot: '#f59e0b' },
+  partial: { bg: '#e0f2fe', text: '#0369a1', dot: '#0ea5e9' },
+  overdue: { bg: '#fee2e2', text: '#dc2626', dot: '#ef4444' },
 }
 
 export default function StatusBadge({ status, size = 'sm' }) {
